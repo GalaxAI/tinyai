@@ -3,6 +3,7 @@
 # %% ../nbs/05_datasets.ipynb 1
 from __future__ import annotations
 import math, numpy as np, matplotlib.pyplot as plt
+from torch.utils.data import DataLoader
 from operator import itemgetter
 from itertools import zip_longest
 import fastcore.all as fc
@@ -117,7 +118,8 @@ class DataLoaders:
     @classmethod
     def from_dd(cls, dd, batch_size, as_tuple=True, split = 0.1, test=False, **kwargs):
         f = collate_dict(dd['train'])
-        if test in dd:
+        if test:
             return cls(*test_dls(*dd.values(), bs=batch_size, collate_fn=f, split=split,  **kwargs))
         else:
             return cls(*get_dls(*dd.values(), bs=batch_size, collate_fn=f, **kwargs))
+
