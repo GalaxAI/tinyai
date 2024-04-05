@@ -101,10 +101,12 @@ def show_images(ims: list,  # Images to show
     for im, t, ax in zip_longest(ims, titles or [], axs): show_image(im, ax=ax, title=t)
 
 # %% ../nbs/05_datasets.ipynb 53
-def test_dls(train_ds, test_ds, bs, **kwargs):
+def test_dls(train_ds, test_ds, bs, split, **kwargs):
     test_dl = DataLoader(test_ds, batch_size=bs * 2, **kwargs)
-    train_dl,valid_dl = get_dls(train_ds,train_ds,bs)
+    train_ds,valid_ds = train_ds.train_test_split(split).values()
+    train_dl,valid_dl = get_dls(train_ds,valid_ds, bs, **kwargs)
     return train_dl,valid_dl,test_dl
+
 
 # %% ../nbs/05_datasets.ipynb 55
 class DataLoaders:
@@ -113,9 +115,9 @@ class DataLoaders:
         self.test = dls[2] if len(dls) > 2 else None
 
     @classmethod
-    def from_dd(cls, dd, batch_size, as_tuple=True, **kwargs):
+    def from_dd(cls, dd, batch_size, as_tuple=True, split = 0.1, test=False, **kwargs):
         f = collate_dict(dd['train'])
-        if 'test' in dd:
-            return cls(*test_dls(*dd.values(), bs=batch_size, collate_fn=f, **kwargs))
+        if test in dd:
+            return cls(*test_dls(*dd.values(), bs=batch_size, collate_fn=f, split=split,  **kwargs))
         else:
-            return cls(*get_dls(dd['train'], dd['valid'], bs=batch_size, collate_fn=f, **kwargs))
+            return cls(*get_dls(*dd.values(), bs=batch_size, collate_fn=f, **kwargs))
